@@ -80,6 +80,7 @@ public partial class MainWindow : Window
         
         InitializeComponent();
         DataContext = this;
+        Closing += MainWindow_Closing;
 
         // Инициализация каждой команды с помощью RelayCommand и передача метода класса
 
@@ -372,5 +373,26 @@ public partial class MainWindow : Window
             File.WriteAllText(helpFilePath, htmlContent);
         }
         return helpFilePath;
+    }
+
+
+    private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        MessageBoxResult result = MessageBox.Show("Хотите сохранить изменения перед закрытием?", "Подтверждение", MessageBoxButton.YesNoCancel);
+
+        switch (result)
+        {
+            case MessageBoxResult.Yes:
+                // Сохранить изменения
+                SaveFile(null);
+                break;
+            case MessageBoxResult.No:
+                // Не сохранять изменения
+                break;
+            case MessageBoxResult.Cancel:
+                // Отменить закрытие окна
+                e.Cancel = true;
+                break;
+        }
     }
 }
