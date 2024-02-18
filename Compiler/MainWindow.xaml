@@ -1,0 +1,136 @@
+﻿<Window x:Class="Compiler.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Compiler" MinHeight="450" MinWidth="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Меню -->
+            <Menu Grid.Row="0">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Создать" Command="{Binding CreateButtonClick}"/>
+                <MenuItem Header="Открыть" Command="{Binding OpenButtonClick}"/>
+                <MenuItem Header="Сохранить" Command="{Binding SaveButtonClick}"/>
+                <MenuItem Header="Сохранить как" Command="{Binding SaveAsButtonClick}"/>
+                <MenuItem Header="Выход" Command="{Binding ExitButtonClick}"/>
+                </MenuItem>
+            <MenuItem Header="Правка">
+            <MenuItem Header="Отменить" Command="{Binding UndoButtonClick}"/>
+            <MenuItem Header="Повторить" Command="{Binding RepeatButtonClick}"/>
+            <MenuItem Header="Вырезать" Command="{Binding CutButtonClick}"/>
+            <MenuItem Header="Копировать" Command="{Binding CopyButtonClick}"/>
+            <MenuItem Header="Вставить" Command="{Binding InsertButtonClick}"/>
+            <MenuItem Header="Удалить" Command="{Binding DeleteButtonClick}"/>
+            <MenuItem Header="Выделить все" Command="{Binding SelectAllButtonClick}"/>
+            </MenuItem>
+            <MenuItem Header="Текст">
+                <MenuItem Header="Постановка задачи" Command="{Binding TaskButtonClick}"/> 
+                <MenuItem Header="Грамматика" Command="{Binding GrammaButtonClick}"/> 
+                <MenuItem Header="Классификация грамматики" Command="{Binding GrammaClassificationButtonClick}"/> 
+                <MenuItem Header="Метод анализа" Command="{Binding AnalyzMethodButtonClick}"/> 
+                <MenuItem Header="Диагностика и нейтрализация ошибок" Command="{Binding DiagnosticButtonClick}"/> 
+                <MenuItem Header="Тестовый пример" Command="{Binding TestExampleButtonClick}"/> 
+                <MenuItem Header="Список литературы" Command="{Binding LiteratureButtonClick}"/> 
+                <MenuItem Header="Исходный код программы" Command="{Binding SourceCodeButtonClick}"/> 
+            </MenuItem>
+                <MenuItem Header="Пуск" Command="{Binding StartButtonClick}"/>
+                <MenuItem Header="Справка">
+                <MenuItem Header="Вызов справки" Command="{Binding HelpButtonClick}"/> 
+                <MenuItem Header="О программе" Command="{Binding AboutButtonClick}"/> 
+            </MenuItem>
+        </Menu>
+        <!-- Тулбар -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1">
+            <!-- Кнопка "Создание документа" -->
+            <Button Command="{Binding CreateButtonClick}">
+                <materialDesign:PackIcon Kind="FileDocumentOutline" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Открытие документа" -->
+            <Button Command="{Binding OpenButtonClick}">
+                <materialDesign:PackIcon Kind="FolderOpenOutline" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Сохранение текущих изменений в документе" -->
+            <Button Command="{Binding SaveButtonClick}">
+                <materialDesign:PackIcon Kind="ContentSaveOutline" Margin="5"/>
+            </Button>
+
+            <!-- Разделитель -->
+            <Separator VerticalAlignment="Center" Margin="15"/>
+
+            <!-- Кнопка "Отмена изменений" -->
+            <Button Command="{Binding UndoButtonClick}">
+                <materialDesign:PackIcon Kind="UndoVariant" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Повтор последнего изменения" -->
+            <Button Command="{Binding RepeatButtonClick}">
+                <materialDesign:PackIcon Kind="RedoVariant" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Копировать текстовый фрагмент" -->
+            <Button Command="{Binding CopyButtonClick}">
+                <materialDesign:PackIcon Kind="ContentCopy" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Вырезать текстовый фрагмент" -->
+            <Button Command="{Binding CutButtonClick}">
+                <materialDesign:PackIcon Kind="ContentCut" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Вставить текстовый фрагмент" -->
+            <Button Command="{Binding InsertButtonClick}">
+                <materialDesign:PackIcon Kind="ContentPaste" Margin="5"/>
+            </Button>
+
+            <Separator VerticalAlignment="Center" Margin="15"/>
+
+            <!-- Кнопка "Запуск синтаксического анализатора" -->
+            <Button Command="{Binding StartButtonClick}">
+                <materialDesign:PackIcon Kind="Play" Margin="5"/>
+            </Button>
+        
+            <Separator VerticalAlignment="Center" Margin="15"/>
+
+            <!-- Кнопка "Вызов справки - руководства пользователя" -->
+            <Button Command="{Binding HelpButtonClick}">
+                <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="5"/>
+            </Button>
+
+            <!-- Кнопка "Вызов информации о программе" -->
+            <Button Command="{Binding AboutButtonClick}">
+                <materialDesign:PackIcon Kind="InformationOutline" Margin="5"/>
+            </Button>
+        </StackPanel>
+        <!--Окно ввода -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0"  Content="Окно ввода:" FontWeight="Bold" FontSize="16"></Label>
+            <avalonedit:TextEditor Grid.Row="1" Name="textEditor" FontFamily="Consolas" FontSize="14" VerticalScrollBarVisibility="Auto"/>
+        </Grid>
+        <!--Окно вывода -->
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Результат компиляции:" FontWeight="Bold" FontSize="16"></Label>
+            <TextBlock Grid.Row="1" TextWrapping="Wrap" Margin="10" />
+        </Grid>
+    </Grid>
+</Window>
