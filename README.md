@@ -33,7 +33,7 @@
    | Файл | ![Главное окно программы](/ReadMeImages/fileview.png) |
    | Правка | ![Правка](/ReadMeImages/editview.png) |
    | Текст | ![Текст](/ReadMeImages/textview.png) |
-   | Пуск | — |
+   | Пуск | ![Старт](/ReadMeImages/startview.png) |
    | Справка | ![Справка](/ReadMeImages/helpview.png) |
 4. Панель инструментов
    
@@ -76,7 +76,7 @@
 | Раздел | Изображение |
 | ------ | ------ |
 | Вызов справки | <img src="/ReadMeImages/helpview.png" alt="Вызов справки" width="500"> |
-| О программе | <img src="/ReadMeImages/aboutview.png" alt="О программе" width="500"> |
+| О программе | <img src="/ReadMeImages/aboutviewclick.png" alt="О программе" width="500"> |
 
 ### Вывод сообщений
 
