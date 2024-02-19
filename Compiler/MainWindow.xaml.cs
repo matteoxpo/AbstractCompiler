@@ -39,14 +39,14 @@ public class RelayCommand : ICommand
 
 public partial class MainWindow : Window
 {
-    // Файл - всё в лаб 1
+    // Файл
     public ICommand CreateButtonClick { get; }
     public ICommand OpenButtonClick { get; }
     public ICommand SaveButtonClick { get; }
     public ICommand SaveAsButtonClick { get; }
     public ICommand ExitButtonClick { get; }
 
-    // Правка - всё в лаб 1
+    // Правка
     public ICommand UndoButtonClick { get; }
     public ICommand RepeatButtonClick { get; }
     public ICommand CutButtonClick { get; }
@@ -68,7 +68,7 @@ public partial class MainWindow : Window
     // Пуск
     public ICommand StartButtonClick { get; }
 
-    // Справка - всё в лаб 1
+    // Справка
     public ICommand HelpButtonClick { get; }
     public ICommand AboutButtonClick { get; }
 
@@ -81,6 +81,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
         Closing += MainWindow_Closing;
+        DragEnter += new DragEventHandler(MainWindow_DragEnter);
+        Drop += new DragEventHandler(MainWindow_Drop);
 
         // Инициализация каждой команды с помощью RelayCommand и передача метода класса
 
@@ -383,16 +385,75 @@ public partial class MainWindow : Window
         switch (result)
         {
             case MessageBoxResult.Yes:
-                // Сохранить изменения
-                SaveFile(null);
+                SaveFile(_filePath);
                 break;
             case MessageBoxResult.No:
-                // Не сохранять изменения
                 break;
             case MessageBoxResult.Cancel:
-                // Отменить закрытие окна
                 e.Cancel = true;
                 break;
         }
     }
+    private void MainWindow_DragEnter(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+    }
+
+    private void MainWindow_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                textEditor.Text += LoadFileContent(file);
+            }
+        }
+    }
+    private string LoadFileContent(string filePath) => File.Exists(filePath) ? File.ReadAllText(filePath) : string.Empty;
+    
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox comboBox && comboBox.SelectedItem != null)
+        {
+            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string fontSizeString = selectedItem.Content.ToString();
+                if (int.TryParse(fontSizeString, out int fontSize))
+                {
+                    if (textEditor != null)
+                    {
+                        textEditor.FontSize = fontSize;
+                        textEditor.InvalidateVisual(); // Вызываем переотрисовку textEditor
+                    }
+                }
+            }
+        }
+    }
+
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.KeyboardDevice.Modifiers == ModifierKeys.Control && e.Key == Key.S)
+        {
+            if (_filePath == null)
+            {
+                CreateFile(null);
+            }
+            else
+            {
+                SaveFile(null);
+            }
+            e.Handled = true; 
+        }
+    }
+
+
+
 }

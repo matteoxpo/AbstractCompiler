@@ -1,4 +1,5 @@
 ﻿<Window x:Class="Compiler.MainWindow"
+        PreviewKeyDown="Window_PreviewKeyDown"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -57,7 +59,6 @@
                 <materialDesign:PackIcon Kind="FileDocumentOutline" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Открытие документа" -->
             <Button Command="{Binding OpenButtonClick}">
                 <materialDesign:PackIcon Kind="FolderOpenOutline" Margin="5"/>
             </Button>
@@ -67,49 +68,48 @@
                 <materialDesign:PackIcon Kind="ContentSaveOutline" Margin="5"/>
             </Button>
 
-            <!-- Разделитель -->
+            <ComboBox Width="60" SelectedIndex="3" SelectedValue="{Binding FontSize}" SelectionChanged="ComboBox_SelectionChanged">
+                <ComboBoxItem Content="10"/>
+                <ComboBoxItem Content="12"/>
+                <ComboBoxItem Content="14"/>
+                <ComboBoxItem Content="16"/>
+                <ComboBoxItem Content="18"/>
+            </ComboBox>
+
             <Separator VerticalAlignment="Center" Margin="15"/>
 
-            <!-- Кнопка "Отмена изменений" -->
             <Button Command="{Binding UndoButtonClick}">
                 <materialDesign:PackIcon Kind="UndoVariant" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Повтор последнего изменения" -->
             <Button Command="{Binding RepeatButtonClick}">
                 <materialDesign:PackIcon Kind="RedoVariant" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Копировать текстовый фрагмент" -->
             <Button Command="{Binding CopyButtonClick}">
                 <materialDesign:PackIcon Kind="ContentCopy" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Вырезать текстовый фрагмент" -->
             <Button Command="{Binding CutButtonClick}">
                 <materialDesign:PackIcon Kind="ContentCut" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Вставить текстовый фрагмент" -->
             <Button Command="{Binding InsertButtonClick}">
                 <materialDesign:PackIcon Kind="ContentPaste" Margin="5"/>
             </Button>
 
             <Separator VerticalAlignment="Center" Margin="15"/>
 
-            <!-- Кнопка "Запуск синтаксического анализатора" -->
             <Button Command="{Binding StartButtonClick}">
                 <materialDesign:PackIcon Kind="Play" Margin="5"/>
             </Button>
         
             <Separator VerticalAlignment="Center" Margin="15"/>
 
-            <!-- Кнопка "Вызов справки - руководства пользователя" -->
             <Button Command="{Binding HelpButtonClick}">
                 <materialDesign:PackIcon Kind="HelpCircleOutline" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Вызов информации о программе" -->
             <Button Command="{Binding AboutButtonClick}">
                 <materialDesign:PackIcon Kind="InformationOutline" Margin="5"/>
             </Button>
@@ -121,10 +121,13 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0"  Content="Окно ввода:" FontWeight="Bold" FontSize="16"></Label>
-            <avalonedit:TextEditor Grid.Row="1" Name="textEditor" FontFamily="Consolas" FontSize="14" VerticalScrollBarVisibility="Auto"/>
+            <avalonedit:TextEditor Grid.Row="1" SyntaxHighlighting="C#" Name="textEditor" FontFamily="Consolas" FontSize="14" VerticalScrollBarVisibility="Auto" ShowLineNumbers="True"/>
         </Grid>
+
+        <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch"/>
+        
         <!--Окно вывода -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
