@@ -10,6 +10,7 @@
         Title="Compiler" MinHeight="450" MinWidth="800">
 
     <Grid>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -126,14 +127,27 @@
 
         <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch"/>
         
-        <!--Окно вывода -->
-        <Grid Grid.Row="4">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Label Grid.Row="0" Content="Результат компиляции:" FontWeight="Bold" FontSize="16"></Label>
-            <TextBlock Grid.Row="1" TextWrapping="Wrap" Margin="10" />
-        </Grid>
+        <TabControl Grid.Row="4" Style="{StaticResource MaterialDesignNavigationRailTabControl}">
+            <TabItem Header="Парсер" ToolTip="Синтаксический анализатор" VerticalAlignment="Stretch">
+                <DataGrid x:Name="parserDataGrid" ItemsSource="{Binding WrongLexemes, Mode=OneWay}" SelectedItem="{Binding SelectedLexeme}" AlternationCount="{Binding WrongLexemes.Count}" GridLinesVisibility="All" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№" Binding="{Binding AlternationIndex, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                        <DataGridTextColumn Header="Местоположение" Binding="{Binding Position, Mode=OneWay}"/>
+                        
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Сканер" ToolTip="Лексический анализатор" VerticalAlignment="Stretch">
+                <DataGrid x:Name="lexerDataGrid" SelectedItem="{Binding SelectedLexeme}" ItemsSource="{Binding Lexemes, Mode=OneWay}" AlternationCount="{Binding Lexemes.Count}" GridLinesVisibility="All" AutoGenerateColumns="False" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№" Binding="{Binding AlternationIndex, RelativeSource={RelativeSource AncestorType=DataGridRow}}"/>
+                        <DataGridTextColumn Header="Условный код" Binding="{Binding LexemeCode, Mode=OneWay}" DisplayIndex="1"/>
+                        <DataGridTextColumn Header="Тип лексемы" Binding="{Binding LexemeName, Mode=OneWay}" DisplayIndex="2"/>
+                        <DataGridTextColumn Header="Лексема" Binding="{Binding Value, Mode=OneWay}" DisplayIndex="3"/>
+                        <DataGridTextColumn Header="Местоположение" Binding="{Binding Position, Mode=OneWay}" DisplayIndex="4"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

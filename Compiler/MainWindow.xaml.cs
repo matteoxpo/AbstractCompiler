@@ -13,6 +13,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System;
+using System.Collections.ObjectModel;
+using Compiler.Models.Lexical;
 
 namespace Compiler;
 public class RelayCommand : ICommand
@@ -39,6 +41,26 @@ public class RelayCommand : ICommand
 
 public partial class MainWindow : Window
 {
+    public ObservableCollection<Lexeme> Lexemes { get; set; } = new ();
+    public ObservableCollection<Lexeme> WrongLexemes { get; set; } = new();
+
+    private Lexeme _selectedLexeme;
+
+    public Lexeme SelectedLexeme 
+    {
+        get => _selectedLexeme;
+        set
+        {
+            _selectedLexeme = value;
+            if (_selectedLexeme != null)
+            {
+                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0;
+                textEditor.Select(value.StartIndex, len);
+            }
+        }
+    }
+
+
     // Файл
     public ICommand CreateButtonClick { get; }
     public ICommand OpenButtonClick { get; }
@@ -84,7 +106,8 @@ public partial class MainWindow : Window
         DragEnter += new DragEventHandler(MainWindow_DragEnter);
         Drop += new DragEventHandler(MainWindow_Drop);
 
-        // Инициализация каждой команды с помощью RelayCommand и передача метода класса
+        lexerDataGrid.ItemsSource = Lexemes;
+        parserDataGrid.ItemsSource = WrongLexemes;
 
         // Файл
         CreateButtonClick = new RelayCommand(CreateFile);
@@ -174,7 +197,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                _filePath = openFileDialog.FileName; // Сохраняем путь к открытому файлу
+                _filePath = openFileDialog.FileName;
                 string text = File.ReadAllText(_filePath);
                 textEditor.Text = text;
                 MessageBox.Show($"Файл {_filePath} успешно открыт.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -187,7 +210,6 @@ public partial class MainWindow : Window
     }
     public void SaveFile(object parameter)
     {
-        // Если файл еще не был сохранен, вызываем метод SaveFileAs для выбора места сохранения
         if (string.IsNullOrEmpty(_filePath))
         {
             SaveFileAs(parameter);
@@ -288,7 +310,10 @@ public partial class MainWindow : Window
     public void ViewSourceCode(object parameter) { }
 
     // Пуск
-    public void Start(object parameter) { }
+    public void Start(object parameter) 
+    {
+        LexicalAnalysis();
+    }
 
     // Справка
     public void ViewHelp(object parameter) 
@@ -454,6 +479,13 @@ public partial class MainWindow : Window
         }
     }
 
-
+    private void LexicalAnalysis()
+    {
+        Lexemes.Clear();
+        foreach(var lexeme in LexicalAnalyzer.Analyze(textEditor.Text)) 
+        { 
+            Lexemes.Add(lexeme);
+        }
+    }
 
 }
