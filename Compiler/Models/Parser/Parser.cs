@@ -24,8 +24,7 @@ namespace Compiler.Models.Parser
                         return;
                     }
                 }
-                ReportError($"Ожидался {expectedType}, получено {CurrentLexeme.Type}", CurrentLexeme.StartIndex, CurrentLexeme.EndIndex);
-                Consume();
+                Recline(expectedType);
             }
         }
         private static void Match(LexemeType expectedType)
@@ -38,10 +37,11 @@ namespace Compiler.Models.Parser
                 }
                 else
                 {
-                    ReportError($"Ожидался {expectedType}, получено {CurrentLexeme.Type}", CurrentLexeme.StartIndex, CurrentLexeme.EndIndex);
-                    Consume();
+                    Recline(expectedType);
                 }
-            } else if (expectedType == LexemeType.EndOfExpression) { 
+            } 
+            else if (expectedType == LexemeType.EndOfExpression) 
+            { 
                 ReportError($"Ожидался {expectedType}, получено ничего", _lexemes[_currentIndex - 1].EndIndex + 1, _lexemes[_currentIndex - 1].EndIndex + 1);
             }
         }
@@ -177,6 +177,32 @@ namespace Compiler.Models.Parser
 
                 Match(LexemeType.EndOfExpression);
             }
+        }
+        private static void Recline(IEnumerable<LexemeType> expectedType) 
+        {
+            var startIndex = CurrentLexeme.StartIndex;
+            var message = new string($"Ожидался: {expectedType}, пришло {CurrentLexeme.Type}");
+            while (_currentIndex < _lexemes.Count &&  !expectedType.Contains(CurrentLexeme.Type))
+            {
+                _currentIndex++;
+            }
+
+            if (_currentIndex >= _lexemes.Count)
+            {
+                _currentIndex--;
+                ReportError(message + $"\nОткинутые элементы с {startIndex} по {CurrentLexeme.EndIndex}", startIndex, CurrentLexeme.EndIndex + 1);
+                _currentIndex++;
+            }
+            else if (_currentIndex < _lexemes.Count) 
+            {
+                ReportError(message + $"\nОткинутые элементы с {startIndex} по {CurrentLexeme.EndIndex}", startIndex, CurrentLexeme.EndIndex);
+                _currentIndex++;
+            } 
+
+        }
+        private static void Recline(LexemeType expectedType)
+        {
+            Recline(new List<LexemeType> { expectedType});
         }
     }
 }
