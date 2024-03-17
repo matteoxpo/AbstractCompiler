@@ -15,6 +15,7 @@ using System.Reflection;
 using System;
 using System.Collections.ObjectModel;
 using Compiler.Models.Lexical;
+using Compiler.Models.Parser;
 
 namespace Compiler;
 public class RelayCommand : ICommand
@@ -42,8 +43,21 @@ public class RelayCommand : ICommand
 public partial class MainWindow : Window
 {
     public ObservableCollection<Lexeme> Lexemes { get; set; } = new ();
-    public ObservableCollection<Lexeme> WrongLexemes { get; set; } = new();
+    public ObservableCollection<ParsedError> WrongLexemes { get; set; } = new();
 
+    private ParsedError _selectedError;
+    public ParsedError SelectedError
+    {
+        get => _selectedError;
+        set
+        {
+            _selectedError = value;
+            if (_selectedError != null)
+            {
+                textEditor.Select(value.StartIndex, value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0);
+            }
+        }
+    }
     private Lexeme _selectedLexeme;
 
     public Lexeme SelectedLexeme 
@@ -54,8 +68,7 @@ public partial class MainWindow : Window
             _selectedLexeme = value;
             if (_selectedLexeme != null)
             {
-                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0;
-                textEditor.Select(value.StartIndex, len);
+                textEditor.Select(value.StartIndex, value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0);
             }
         }
     }
@@ -148,12 +161,10 @@ public partial class MainWindow : Window
     {
         string text = textEditor.Text;
 
-        // Если файл уже открыт и содержит текст
         if (!string.IsNullOrEmpty(_filePath))
         {
             MessageBoxResult result = MessageBox.Show("У вас уже открыт файл. Хотите создать новый файл на основе содержимого открытого файла?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            // Если пользователь согласен создать новый файл на основе содержимого открытого файла
             if (result == MessageBoxResult.Yes)
             {
                 try
@@ -167,7 +178,7 @@ public partial class MainWindow : Window
                 }
             }
         }
-        else // Если файл не был открыт
+        else 
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*";
@@ -176,7 +187,7 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    _filePath = saveFileDialog.FileName; // Сохраняем путь к созданному файлу
+                    _filePath = saveFileDialog.FileName;
                     File.WriteAllText(_filePath, text);
                     MessageBox.Show("Файл успешно создан.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -313,7 +324,9 @@ public partial class MainWindow : Window
     public void Start(object parameter) 
     {
         LexicalAnalysis();
+        LexiaclParse();
     }
+   
 
     // Справка
     public void ViewHelp(object parameter) 
@@ -485,6 +498,14 @@ public partial class MainWindow : Window
         foreach(var lexeme in LexicalAnalyzer.Analyze(textEditor.Text)) 
         { 
             Lexemes.Add(lexeme);
+        }
+    }
+    private void LexiaclParse()
+    {
+        WrongLexemes.Clear();
+        foreach(var error in Parser.Parse(Lexemes))
+        {
+            WrongLexemes.Add(error);
         }
     }
 

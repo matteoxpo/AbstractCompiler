@@ -105,14 +105,13 @@
 ### Примеры допустимых строк
 
 ```Haskell
-(\x y -> x * y) 10 4
+(\x y -> x * y) 10 4;
 ```
 ```Haskell
-(\ z y -> y * z) 
-10 4
+(\z y z-> x * y) 10 4;
 ```
 ```Haskell
-(\x y -> x * y) 10 4
+(\x y sdf_2-> x * y) 10 4
 ```
 ### Диаграмма состояний сканера
 
@@ -153,38 +152,52 @@
 G[&lt;ЦК&gt; = &lt;целочисленная константа&gt;]:
 
 V<sub>T</sub> = { 
-   ‘\’, ‘(’, ‘)’, 
+   ‘(\’, ‘)’, 
    ‘a’…’z’, ‘A’…’Z’, ‘_’, 
-   ‘\n’,
+   ‘;’,
    ‘0’…’9’, ‘.’, 
    ‘+’, ‘-‘, ‘*’, ‘/’,
-   ‘->’
+   ‘->’,
+   ‘ ’, ‘;’, ‘>’
 }
 
 V<sub>N</sub> = { 
    &lt;LF&gt;, 
-   CloseBracket, 
-   ArgumentDeclaration, FuncArgument, ArgumentValue,
-   StartOfArguments, EndOfArguments,
-   Var, Operation, Number,
-   Sign, Letter,
-   Digit,
+   ARGFUNC,
+   ARGFUNCREM,
+   ARROW,
+   ARG1REM,
+   OPERATION,
+   ARG1, ARG2,
+   CLOSE,
+   NUMBER1, NUMBER2,
+   INT1, INT2,
+   DECIMAL1, DECIMAL2,
+   SPACENUM,
+   DECIMAL1REM, DECIMAL2REM
 }
 
 P = {
-1. &lt;LF&gt; → ‘(’ StartOfArguments | Number | Var
-2. StartOfArguments → ‘\’ ArgumentDeclaration
-3. ArgumentDeclaration → Var (ArgumentDeclaration | EndOfArguments) 
-4. EndOfArguments → ‘->’ FuncArgument ( Operation FuncArgument | CloseBracket)
-5. FuncArgument → ArgumentDeclaration | Number
-6. CloseBracket → ‘)’ (‘\n’ | ε) ArgumentValue | ArgumentValue ε 
-7. ArgumentValue → ε | Number
-8. Var → Letter { Letter | Digit | ‘_’ } 
-9. Number → Sign [ Digit ]
-10. Letter → ‘a’ | ‘b’ | … | ‘z’ | ‘A’ | ‘B’ | … | ‘Z’
-11. Digit → ‘0’ | ‘1’ | … | ‘9’
-12. Sign → ‘+’ | ‘-‘ | ε
-13. Operation → ‘+’ | ‘-’ | ‘*’ | ‘/’  
+1) LF → (\ ARGFUNC 
+2) ARGFUNC → letter ARGFUNCREM  | "-" ARROW 
+3) ARGFUNCREM → (letter |  | digit) ARGFUNCREM | " " ARGFUNC  | "-" ARROW 
+4) ARROW → > ARG1
+5) ARG1 → letter ARG1REM
+6) ARG1REM → (letter |  | digit) ARG1REM | (+ | - | * | /) OPERATION
+7) OPERATION → letter ARG2
+8) ARG2 → (letter |  | digit) ARG2 | ) CLOSE 
+9) CLOSE → [+ | -] NUMBER1 
+10) NUMBER1 → digit INT1
+11) INT1 → digit INT1 | . DECIMAL1 | " " SPACENUM 
+12) DECIMAL1 → digit DECIMAL1REM 
+13) DECIMAL1REM → digit DECIMAL1REM | " " SPACENUM
+14) SPACENUM → [+ | -] NUMBER2
+15) NUMBER2 → digit INT2
+16) INT2 → digit INT2 | . DECIMAL2 | ; 
+17) DECIMAL2 → digit DECIMAL2REM 
+18) DECIMAL2REM → digit DECIMAL2REM | ;
+19) letter → ‘a’ | ‘b’ | … | ‘z’ | ‘A’ | ‘B’ | … | ‘Z’
+20) digit → ‘0’ | ‘1’ | … | ‘9’
 }
 
 ### Классификация грамматики
@@ -193,7 +206,7 @@ P = {
 
 ### Граф конечного автомата
 
-![Граф конечного автомата](/README_images/finite_state_machine.jpg)
+![Граф конечного автомата](/ReadMeImages/finiteAutomatonDiagram.png)
 
 ### Тестовые примеры
 

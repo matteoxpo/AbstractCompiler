@@ -4,11 +4,8 @@
     {
         Identifier = 0,         // имя переменной
         Whitespace,             // пробел
-        StartOfLambdaArguments, // \
+        StartOfLambdaArguments, // (\
         NewLine,                // \n
-        CarriageReturn,         // \r
-        LambdaArrow,            // ->
-        OpenBracket,            // (
         CloseBracket,           // )
         Integer,                // {цифры}
         Float,                  // {цифры.цифры}
@@ -16,6 +13,9 @@
         SignPlus,               // +
         SignMultiply,           // *
         SignDevide,             // /
+        SignMore,               // >
+        EndOfExpression,        // ;
+
 
         InvalidCharacter        // ОШИБКА
     }

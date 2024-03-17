@@ -12,27 +12,23 @@ public static class LexicalAnalyzer
             char currentChar = rawText[index];
             switch (currentChar)
             {
+                case ';':
+                    lexemes.Add(new Lexeme(LexemeType.EndOfExpression, ";", index));
+                    break;
                 case ' ':
                 case '\t':
                     lexemes.Add(new Lexeme(LexemeType.Whitespace, " \'  \'", index));
-                    break;
-                case '\\':
-                    lexemes.Add(new Lexeme(LexemeType.StartOfLambdaArguments, currentChar.ToString(), index));
                     break;
                 case '\r':
                 case '\n':
                     lexemes.Add(new Lexeme(LexemeType.NewLine, "\\n", index));
                     index++;
                     break;
+                case '>':
+                    lexemes.Add(new Lexeme(LexemeType.SignMore, currentChar.ToString(), index));
+                    break;
                 case '-':
-                    if (index + 1 <= rawText.Length && rawText[index + 1] == '>')
-                    {
-                        lexemes.Add(new Lexeme(LexemeType.LambdaArrow, "->", index, index + 2));
-                    }
-                    else
-                    {
-                        lexemes.Add(new Lexeme(LexemeType.SignMinus, currentChar.ToString(), index));
-                    }
+                    lexemes.Add(new Lexeme(LexemeType.SignMinus, currentChar.ToString(), index));
                     break;
                 case '+':
                     lexemes.Add(new Lexeme(LexemeType.SignPlus, currentChar.ToString(), index));
@@ -43,14 +39,16 @@ public static class LexicalAnalyzer
                 case '/':
                     lexemes.Add(new Lexeme(LexemeType.SignDevide, currentChar.ToString(), index));
                     break;
-                case '(':
-                    lexemes.Add(new Lexeme(LexemeType.OpenBracket, currentChar.ToString(), index));
-                    break;
                 case ')':
                     lexemes.Add(new Lexeme(LexemeType.CloseBracket, currentChar.ToString(), index));
                     break;
                 default:
-                    if (char.IsDigit(currentChar))
+                    if (currentChar == '(' && index + 1 < rawText.Length && rawText[index + 1] == '\\')
+                    {
+                        lexemes.Add(new Lexeme(LexemeType.StartOfLambdaArguments, currentChar.ToString(), index, index + 2));
+                        index++;
+                    }
+                    else if (char.IsDigit(currentChar))
                     {
                         int startIndex = index;
                         while (index < rawText.Length && (char.IsDigit(rawText[index]) || rawText[index] == '.'))
@@ -59,7 +57,7 @@ public static class LexicalAnalyzer
                             {
                                 if (rawText.Substring(startIndex, index - startIndex).Contains('.'))
                                 {
-                                    lexemes.Add(new Lexeme(LexemeType.InvalidCharacter, currentChar.ToString(), index, index));
+                                    lexemes.Add(new Lexeme(LexemeType.InvalidCharacter, currentChar.ToString(), index));
                                     index++;
                                     break;
                                 }
