@@ -54,7 +54,9 @@ public partial class MainWindow : Window
             _selectedError = value;
             if (_selectedError != null)
             {
-                textEditor.Select(value.StartIndex, value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0);
+                var start = value.StartIndex;
+                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0;
+                textEditor.Select(start, len);
             }
         }
     }

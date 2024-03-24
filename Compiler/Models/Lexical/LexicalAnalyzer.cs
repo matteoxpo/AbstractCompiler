@@ -2,7 +2,7 @@
 
 public static class LexicalAnalyzer
 {
-    public static List<char> ReservedLexicals = new List<char>() { ' ', '\n', '\\', '-', '+', '/', '(', ')', '\t', '\r' };
+    public static List<char> ReservedLexicals = new List<char>() { ' ', '\n', '\\', '-', '+', '/', '(', ')', '\t', '\r', '>' };
     public static List<Lexeme> Analyze(string rawText)
     {
         var lexemes = new List<Lexeme>();
@@ -14,6 +14,12 @@ public static class LexicalAnalyzer
             {
                 case ';':
                     lexemes.Add(new Lexeme(LexemeType.EndOfExpression, ";", index));
+                    break;
+                case '(':
+                    lexemes.Add(new Lexeme(LexemeType.OpenBracket, "(", index));
+                    break;
+                case '\\':
+                    lexemes.Add(new Lexeme(LexemeType.InverseSlash, "\\", index));
                     break;
                 case ' ':
                 case '\t':
@@ -43,12 +49,7 @@ public static class LexicalAnalyzer
                     lexemes.Add(new Lexeme(LexemeType.CloseBracket, currentChar.ToString(), index));
                     break;
                 default:
-                    if (currentChar == '(' && index + 1 < rawText.Length && rawText[index + 1] == '\\')
-                    {
-                        lexemes.Add(new Lexeme(LexemeType.StartOfLambdaArguments, currentChar.ToString(), index, index + 2));
-                        index++;
-                    }
-                    else if (char.IsDigit(currentChar))
+                   if (char.IsDigit(currentChar))
                     {
                         int startIndex = index;
                         while (index < rawText.Length && (char.IsDigit(rawText[index]) || rawText[index] == '.'))

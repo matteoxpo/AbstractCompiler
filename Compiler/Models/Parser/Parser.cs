@@ -1,4 +1,5 @@
 ﻿using Compiler.Models.Lexical;
+using System.Text;
 namespace Compiler.Models.Parser
 {
     public static class Parser
@@ -75,7 +76,8 @@ namespace Compiler.Models.Parser
         {
             if (_currentIndex < _lexemes.Count)
             {
-                Match(LexemeType.StartOfLambdaArguments);
+                Match(LexemeType.OpenBracket);
+                Match(LexemeType.InverseSlash);
                 ARGFUNC();
             }
         }
@@ -181,7 +183,13 @@ namespace Compiler.Models.Parser
         private static void Recline(IEnumerable<LexemeType> expectedType) 
         {
             var startIndex = CurrentLexeme.StartIndex;
-            var message = new string($"Ожидался: {expectedType}, пришло {CurrentLexeme.Type}");
+            StringBuilder types = new StringBuilder();
+            foreach(var type in expectedType)
+            {
+                types.Append(type.ToString() + ", ");
+            }
+            var message = new string($"Ожидалось:[ {types} ], пришло {CurrentLexeme.Type}");
+            Console.WriteLine(_lexemes.Count);
             while (_currentIndex < _lexemes.Count &&  !expectedType.Contains(CurrentLexeme.Type))
             {
                 _currentIndex++;
@@ -195,14 +203,14 @@ namespace Compiler.Models.Parser
             }
             else if (_currentIndex < _lexemes.Count) 
             {
-                ReportError(message + $"\nОткинутые элементы с {startIndex} по {CurrentLexeme.EndIndex}", startIndex, CurrentLexeme.EndIndex);
+                ReportError(message + $"\nОткинутые элементы с {startIndex} по {CurrentLexeme.EndIndex}", startIndex, CurrentLexeme.EndIndex - 1);
                 _currentIndex++;
             } 
 
         }
         private static void Recline(LexemeType expectedType)
         {
-            Recline(new List<LexemeType> { expectedType});
+            Recline(new List<LexemeType> { expectedType });
         }
     }
 }

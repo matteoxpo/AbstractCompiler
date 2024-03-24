@@ -4,9 +4,10 @@
     {
         Identifier = 0,         // имя переменной
         Whitespace,             // пробел
-        StartOfLambdaArguments, // (\
         NewLine,                // \n
         CloseBracket,           // )
+        OpenBracket,            // (
+        InverseSlash,           // /
         Integer,                // {цифры}
         Float,                  // {цифры.цифры}
         SignMinus,              // -
