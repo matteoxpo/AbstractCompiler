@@ -1,6 +1,6 @@
 ﻿namespace Compiler.Models.Lexical
 {
-    public class Lexeme
+    public sealed class Lexeme
     {
 
         public Lexeme(LexemeType type, string value, int startIndex)

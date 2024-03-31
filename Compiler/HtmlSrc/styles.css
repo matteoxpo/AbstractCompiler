@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif; 
+    margin: 20px;
+    padding: 0;
+    /* background: linear-gradient(to bottom right, #FFFFFF, rgb(152, 214, 250)); */
+    /* animation: gradientAnimation 2s infinite alternate; */
+}
+@keyframes gradientAnimation {
+    0% {
+        background-position: center left;
+    }
+    100% {
+        background-position: bottom right;
+    }
+}
+
+h1 {
+    color: #333;
+}
+h2 {
+    color: #666;
+}
+p {
+    line-height: 1.5;
+}
+code {
+    font-family: Consolas, monospace;
+    background-color: #f4f4f4;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+ul li::before {
+    content: "\2022";
+    color: #333;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+}

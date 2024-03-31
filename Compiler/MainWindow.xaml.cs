@@ -1,21 +1,12 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.IO;
-using System.Diagnostics;
-using System.Reflection;
-using System;
 using System.Collections.ObjectModel;
 using Compiler.Models.Lexical;
 using Compiler.Models.Parser;
+using Compiler.Models;
 
 namespace Compiler;
 public class RelayCommand : ICommand
@@ -42,7 +33,20 @@ public class RelayCommand : ICommand
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<Lexeme> Lexemes { get; set; } = new ();
+    private const string _aboutPath = @"HtmlSrc\About.html";
+    private const string _grammarClassificationPath = @"HtmlSrc\GrammarClassification.html";
+    private const string _grammarPath = @"HtmlSrc\Grammar.html";
+    private const string _methodOfAnalysisPath = @"HtmlSrc\MethodOfAnalysis.html";
+    private const string _neutralizingErrorsPath = @"HtmlSrc\NeutralizingErrors.html";
+    private const string _problemStatementPath = @"HtmlSrc\ProblemStatement.html";
+    private const string _TestCasePath = @"HtmlSrc\TestCase.html";
+    private const string _literaturePath = @"HtmlSrc\ListOfLiterature.html";
+    private const string _sourceCode = @"https://github.com/matteoxpo/AbstractCompiler";
+
+    private const string _documentationPath = @"HtmlSrc\Documentation.html";
+
+
+    public ObservableCollection<Lexeme> Lexemes { get; set; } = new();
     public ObservableCollection<ParsedError> WrongLexemes { get; set; } = new();
 
     private ParsedError _selectedError;
@@ -62,7 +66,7 @@ public partial class MainWindow : Window
     }
     private Lexeme _selectedLexeme;
 
-    public Lexeme SelectedLexeme 
+    public Lexeme SelectedLexeme
     {
         get => _selectedLexeme;
         set
@@ -70,6 +74,7 @@ public partial class MainWindow : Window
             _selectedLexeme = value;
             if (_selectedLexeme != null)
             {
+                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 1;
                 textEditor.Select(value.StartIndex, value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0);
             }
         }
@@ -114,7 +119,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        
+
         InitializeComponent();
         DataContext = this;
         Closing += MainWindow_Closing;
@@ -180,7 +185,7 @@ public partial class MainWindow : Window
                 }
             }
         }
-        else 
+        else
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*";
@@ -201,7 +206,7 @@ public partial class MainWindow : Window
         }
     }
 
-    public void OpenFile(object parameter) 
+    public void OpenFile(object parameter)
     {
         OpenFileDialog openFileDialog = new OpenFileDialog();
         openFileDialog.Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*";
@@ -253,7 +258,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                _filePath = saveFileDialog.FileName; // Обновляем путь к файлу
+                _filePath = saveFileDialog.FileName;
                 File.WriteAllText(_filePath, text);
                 MessageBox.Show("Файл успешно сохранен.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -265,7 +270,6 @@ public partial class MainWindow : Window
     }
     public void ExitApplication(object parameter)
     {
-        // Если есть несохраненные изменения, запрашиваем подтверждение пользователя
         if (HasUnsavedChanges())
         {
             MessageBoxResult result = MessageBox.Show("Есть несохраненные изменения. Хотите сохранить перед выходом?", "Подтверждение выхода", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
@@ -273,13 +277,12 @@ public partial class MainWindow : Window
             switch (result)
             {
                 case MessageBoxResult.Yes:
-                    SaveFile(parameter); // Сохраняем файл
+                    SaveFile(parameter);
                     break;
                 case MessageBoxResult.No:
-                    // Просто выходим
                     break;
                 case MessageBoxResult.Cancel:
-                    return; // Отменяем выход
+                    return;
             }
         }
 
@@ -288,8 +291,6 @@ public partial class MainWindow : Window
 
     private bool HasUnsavedChanges()
     {
-        // Если файл не был открыт, либо содержимое файла отличается от содержимого текстового редактора,
-        // значит, есть несохраненные изменения
         return string.IsNullOrEmpty(_filePath) || File.ReadAllText(_filePath) != textEditor.Text;
     }
     public void Undo(object parameter)
@@ -312,111 +313,31 @@ public partial class MainWindow : Window
     public void Delete(object parameter) => textEditor.SelectedText = String.Empty;
     public void SelectAll(object parameter) => textEditor.SelectAll();
 
+
     // Текст
-    public void ViewTask(object parameter) { }
-    public void ViewGramma(object parameter) { }
-    public void ViewGrammaClassification(object parameter) { }
-    public void ViewAnalyzMethod(object parameter) { }
-    public void ViewDiagnostic(object parameter) { }
-    public void ViewTestExample(object parameter) { }
-    public void ViewLiterature(object parameter) { }
-    public void ViewSourceCode(object parameter) { }
+    public void ViewTask(object parameter) => Open(_problemStatementPath);
+    public void ViewGramma(object parameter) => Open(_grammarPath);
+    public void ViewGrammaClassification(object parameter) => Open(_grammarClassificationPath);
+    public void ViewAnalyzMethod(object parameter) => Open(_methodOfAnalysisPath);
+    public void ViewDiagnostic(object parameter) => Open(_neutralizingErrorsPath);
+    public void ViewTestExample(object parameter) => Open(_TestCasePath);
+    public void ViewLiterature(object parameter) => Open(_literaturePath);
+    public void ViewSourceCode(object parameter) => HtmlService.Open(_sourceCode);
+
+
 
     // Пуск
-    public void Start(object parameter) 
+    public void Start(object parameter)
     {
         LexicalAnalysis();
         LexiaclParse();
     }
-   
+
 
     // Справка
-    public void ViewHelp(object parameter) 
-    {
-        try
-        {
-            var openBrowserProcess = new Process()
-            {
-                StartInfo = new ProcessStartInfo(GenerateHelpHtml())
-                {
-                    UseShellExecute = true
-                }
-            };
-            openBrowserProcess.Start();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Ошибка при открытии файла справки: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-    public void ViewAbout(object parameter)
-    {
-        MessageBox.Show("" +
-            "Compiler - текстовый редактор для языкового процессора\n" +
-            "Название приложения: Compiler\n" +
-            "Версия: 1.0\n" +
-            "Автор: Хромин Сергей Константинович\n" +
-            "Дата создания: 15.02.2024\n",
-            "О приложении", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
+    public void ViewHelp(object parameter) => Open(_documentationPath);
 
-
-
-
-    public string GenerateHelpHtml()
-    {
-        // Путь к исполняемому файлу приложения
-        string executablePath = Assembly.GetExecutingAssembly().Location;
-
-        // Путь к папке, в которой находится исполняемый файл
-        string directoryPath = System.IO.Path.GetDirectoryName(executablePath);
-
-        // Путь к HTML-файлу справки
-        string helpFilePath = System.IO.Path.Combine(directoryPath, "documentation.html");
-
-        if (!File.Exists(helpFilePath))
-        {
-            // Содержимое HTML-файла справки
-            string htmlContent = @"
-<!DOCTYPE html>
-<html lang=""en"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Справка по приложению</title>
-</head>
-<body>
-    <h1>Справка по приложению</h1>
-    <h2>Меню ""Файл""</h2>
-    <ul>
-        <li><strong>Создать:</strong> Создает новый документ.</li>
-        <li><strong>Открыть:</strong> Открывает существующий документ.</li>
-        <li><strong>Сохранить:</strong> Сохраняет текущий документ.</li>
-        <li><strong>Сохранить как:</strong> Сохраняет текущий документ с новым именем.</li>
-        <li><strong>Выход:</strong> Завершает работу приложения.</li>
-    </ul>
-    <h2>Меню ""Правка""</h2>
-    <ul>
-        <li><strong>Отменить:</strong> Отменяет последнее действие.</li>
-        <li><strong>Повторить:</strong> Повторяет последнее отмененное действие.</li>
-        <li><strong>Вырезать:</strong> Вырезает выбранный текст.</li>
-        <li><strong>Копировать:</strong> Копирует выбранный текст.</li>
-        <li><strong>Вставить:</strong> Вставляет скопированный или вырезанный текст.</li>
-        <li><strong>Удалить:</strong> Удаляет выбранный текст.</li>
-        <li><strong>Выделить все:</strong> Выделяет весь текст в редакторе.</li>
-    </ul>
-    <h2>Меню ""Текст""</h2>
-    <p>В данном разделе будет содержаться информация о функциях из меню ""Текст"".</p>
-</body>
-</html>
-";
-        // Запись содержимого HTML-файла в файл
-       
-            File.WriteAllText(helpFilePath, htmlContent);
-        }
-        return helpFilePath;
-    }
-
+    public void ViewAbout(object parameter) => Open(_aboutPath);
 
     private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
@@ -458,7 +379,7 @@ public partial class MainWindow : Window
         }
     }
     private string LoadFileContent(string filePath) => File.Exists(filePath) ? File.ReadAllText(filePath) : string.Empty;
-    
+
     private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (sender is ComboBox comboBox && comboBox.SelectedItem != null)
@@ -477,6 +398,19 @@ public partial class MainWindow : Window
             }
         }
     }
+    private void Open(string path)
+    {
+        try
+        {
+            HtmlService.Open(GetFullPath(path));
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка при открытии url: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private string GetFullPath(string path) => System.IO.Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, path);
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
@@ -490,22 +424,22 @@ public partial class MainWindow : Window
             {
                 SaveFile(null);
             }
-            e.Handled = true; 
+            e.Handled = true;
         }
     }
 
     private void LexicalAnalysis()
     {
         Lexemes.Clear();
-        foreach(var lexeme in LexicalAnalyzer.Analyze(textEditor.Text)) 
-        { 
+        foreach (var lexeme in LexicalAnalyzer.Analyze(textEditor.Text))
+        {
             Lexemes.Add(lexeme);
         }
     }
     private void LexiaclParse()
     {
         WrongLexemes.Clear();
-        foreach(var error in Parser.Parse(Lexemes))
+        foreach (var error in Parser.Parse(Lexemes))
         {
             WrongLexemes.Add(error);
         }

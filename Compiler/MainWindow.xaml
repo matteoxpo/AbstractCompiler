@@ -53,9 +53,7 @@
                 <MenuItem Header="О программе" Command="{Binding AboutButtonClick}"/> 
             </MenuItem>
         </Menu>
-        <!-- Тулбар -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1">
-            <!-- Кнопка "Создание документа" -->
             <Button Command="{Binding CreateButtonClick}">
                 <materialDesign:PackIcon Kind="FileDocumentOutline" Margin="5"/>
             </Button>
