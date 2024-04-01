@@ -67,7 +67,7 @@
                 <materialDesign:PackIcon Kind="ContentSaveOutline" Margin="5"/>
             </Button>
 
-            <ComboBox Width="60" SelectedIndex="3" SelectedValue="{Binding FontSize}" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBox Width="60" SelectedIndex="2" SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBoxItem Content="10"/>
                 <ComboBoxItem Content="12"/>
                 <ComboBoxItem Content="14"/>
