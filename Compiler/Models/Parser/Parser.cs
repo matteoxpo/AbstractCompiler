@@ -5,14 +5,18 @@ namespace Compiler.Models.Parser
     public static class Parser
     {
         private static List<Lexeme>? _lexemes;
+        private static bool[] isReclined;
         private static int _currentIndex;
+        private static bool _useRecline;
         private static List<ParsedError> _errors;
         private static Lexeme CurrentLexeme => _lexemes[_currentIndex];
 
+        private static Stack<LexemeType> _requiredTypes;
+
         private static void Consume() => _currentIndex++;
         
-        private static void ReportError(string message, int startIndex, int endIndex) => _errors.Add(new ParsedError(message, startIndex, endIndex != startIndex ? endIndex : startIndex + 1));
-        
+        private static void ReportError(string message, int startIndex, int endIndex) => _errors.Add(new ParsedError(message, startIndex, endIndex));
+        private static void Match(LexemeType expectedType) => Match(new List<LexemeType> { expectedType });
         private static void Match(IEnumerable<LexemeType> expectedType)
         {
             if (_currentIndex < _lexemes.Count)
@@ -25,37 +29,18 @@ namespace Compiler.Models.Parser
                         return;
                     }
                 }
-                Recline(expectedType);
             }
+            Recline(expectedType);
         }
-        private static void Match(LexemeType expectedType)
+        public static List<ParsedError> Parse(IEnumerable<Lexeme> lexemes, bool useRecline)
         {
-            if (_currentIndex < _lexemes.Count)
-            {
-                if (CurrentLexeme.Type == expectedType)
-                {
-                    Consume();
-                }
-                else
-                {
-                    Recline(expectedType);
-                }
-            } 
-            else if (expectedType == LexemeType.EndOfExpression) 
-            { 
-                ReportError($"Ожидался {expectedType}, получено ничего", _lexemes[_currentIndex - 1].EndIndex + 1, _lexemes[_currentIndex - 1].EndIndex + 1);
-            }
-        }
-
-        public static List<ParsedError> Parse(IEnumerable<Lexeme> lexemes)
-        {
+            _useRecline = useRecline;
             _lexemes = lexemes?.Where(lexeme => lexeme.Type != LexemeType.Whitespace).ToList() ?? throw new ArgumentNullException(nameof(lexemes));
             _currentIndex = 0;
             _errors = new List<ParsedError>();
             Program();
             return _errors;
         }
-
         private static void Program()
         {
             while (_currentIndex < _lexemes.Count)
@@ -71,7 +56,6 @@ namespace Compiler.Models.Parser
                 LF();
             }
         }
-
         private static void LF()
         {
             if (_currentIndex < _lexemes.Count)
@@ -81,7 +65,6 @@ namespace Compiler.Models.Parser
                 ARGFUNC();
             }
         }
-
         private static void ARGFUNC()
         {
             if (_currentIndex < _lexemes.Count)
@@ -93,7 +76,6 @@ namespace Compiler.Models.Parser
                 }
                 else
                 {
-                    Match(LexemeType.Identifier);
                     ARGFUNCREM();
                 }
             }
@@ -101,18 +83,12 @@ namespace Compiler.Models.Parser
 
         private static void ARGFUNCREM()
         {
-            if (_currentIndex < _lexemes.Count && CurrentLexeme.Type == LexemeType.Identifier)
-            {
-                Consume();
-            }
-            if (_currentIndex < _lexemes.Count && CurrentLexeme.Type == LexemeType.NewLine)
-            {
-                Consume();
-            }
-            else
-            {
-                ARGFUNC();
-            }
+            Match( LexemeType.Identifier);
+            ARGFUNC();
+            //if (_currentIndex < _lexemes.Count && (CurrentLexeme.Type == LexemeType.Identifier || CurrentLexeme.Type == LexemeType.NewLine))
+            //{
+                //Consume();
+            //}
         }
 
         private static void ARROW()
@@ -182,18 +158,33 @@ namespace Compiler.Models.Parser
         }
         private static void Recline(IEnumerable<LexemeType> expectedType) 
         {
+            var message = CreateExpectedTypeMessage(expectedType);
+            
+            //if (!_useRecline)
+            //{
+            //    //if (expectedType.First == LexemeType.)
+
+            //    ReportError(message, CurrentLexeme.StartIndex, CurrentLexeme.EndIndex);
+            //    if (_currentIndex < _lexemes.Count)
+            //    {
+            //        Consume();
+            //    }
+            //    return;
+            //}
+            
             var startIndex = CurrentLexeme.StartIndex;
-            StringBuilder types = new StringBuilder();
-            foreach(var type in expectedType)
+            var parseIndex = _currentIndex;
+
+            while (parseIndex < _lexemes.Count && !expectedType.Contains(_lexemes[parseIndex].Type))
             {
-                types.Append(type.ToString() + ", ");
+                parseIndex++;
             }
-            var message = new string($"Ожидалось:[ {types} ], пришло {CurrentLexeme.Type}");
-            Console.WriteLine(_lexemes.Count);
-            while (_currentIndex < _lexemes.Count &&  !expectedType.Contains(CurrentLexeme.Type))
+            if (parseIndex >= _lexemes.Count) 
             {
-                _currentIndex++;
+                ReportError(message , startIndex, CurrentLexeme.EndIndex + 1);
             }
+
+            _currentIndex = parseIndex;
 
             if (_currentIndex >= _lexemes.Count)
             {
@@ -208,9 +199,18 @@ namespace Compiler.Models.Parser
             } 
 
         }
-        private static void Recline(LexemeType expectedType)
+
+        private static string CreateExpectedTypeMessage(IEnumerable<LexemeType> expectedType)
         {
-            Recline(new List<LexemeType> { expectedType });
+            var types = new StringBuilder();
+
+            foreach (var type in expectedType)
+            {
+                types.Append(type.ToString() + (expectedType.Count() > 1 ? ", " : ""));
+            }
+
+            return new string($"Ожидалось:[ {types} ], пришло {CurrentLexeme.Type}");
         }
+        private static void Recline(LexemeType expectedType) => Recline(new List<LexemeType> { expectedType });
     }
 }

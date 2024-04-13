@@ -80,6 +80,7 @@ public partial class MainWindow : Window
         }
     }
 
+    public bool UseRecline { get;   set; }
 
     // Файл
     public ICommand CreateButtonClick { get; }
@@ -439,7 +440,7 @@ public partial class MainWindow : Window
     private void LexiaclParse()
     {
         WrongLexemes.Clear();
-        foreach (var error in Parser.Parse(Lexemes))
+        foreach (var error in Parser.Parse(Lexemes, UseRecline))
         {
             WrongLexemes.Add(error);
         }

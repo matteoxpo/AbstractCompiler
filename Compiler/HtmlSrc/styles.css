@@ -2,8 +2,6 @@ body {
     font-family: Arial, sans-serif; 
     margin: 20px;
     padding: 0;
-    /* background: linear-gradient(to bottom right, #FFFFFF, rgb(152, 214, 250)); */
-    /* animation: gradientAnimation 2s infinite alternate; */
 }
 @keyframes gradientAnimation {
     0% {
@@ -14,12 +12,6 @@ body {
     }
 }
 
-h1 {
-    color: #333;
-}
-h2 {
-    color: #666;
-}
 p {
     line-height: 1.5;
 }

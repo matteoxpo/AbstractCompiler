@@ -7,7 +7,7 @@
         xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Compiler" MinHeight="450" MinWidth="800">
+        Title="Compiler" MinHeight="450" MinWidth="1000">
 
     <Grid>
 
@@ -62,7 +62,6 @@
                 <materialDesign:PackIcon Kind="FolderOpenOutline" Margin="5"/>
             </Button>
 
-            <!-- Кнопка "Сохранение текущих изменений в документе" -->
             <Button Command="{Binding SaveButtonClick}">
                 <materialDesign:PackIcon Kind="ContentSaveOutline" Margin="5"/>
             </Button>
@@ -75,8 +74,10 @@
                 <ComboBoxItem Content="18"/>
             </ComboBox>
 
-            <Separator VerticalAlignment="Center" Margin="15"/>
-
+            <CheckBox Margin="5" IsChecked="{Binding UseRecline}">
+                <materialDesign:PackIcon Kind="ErrorOutline" />
+            </CheckBox>
+            
             <Button Command="{Binding UndoButtonClick}">
                 <materialDesign:PackIcon Kind="UndoVariant" Margin="5"/>
             </Button>
@@ -86,7 +87,7 @@
             </Button>
 
             <Button Command="{Binding CopyButtonClick}">
-                <materialDesign:PackIcon Kind="ContentCopy" Margin="5"/>
+                <materialDesign:PackIcon Kind="ContentCopy"  Height="15" Width="15" Margin="5"/>
             </Button>
 
             <Button Command="{Binding CutButtonClick}">
@@ -113,7 +114,7 @@
                 <materialDesign:PackIcon Kind="InformationOutline" Margin="5"/>
             </Button>
         </StackPanel>
-        <!--Окно ввода -->
+
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
