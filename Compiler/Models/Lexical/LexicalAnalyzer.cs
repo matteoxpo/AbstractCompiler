@@ -1,5 +1,6 @@
-﻿namespace Compiler.Models.Lexical;
+﻿using Compiler.Models.Lexical;
 
+namespace Compiler.Models.Lexical;
 public static class LexicalAnalyzer
 {
     public static List<char> ReservedLexicals = new List<char>() { ' ', '\n', '\\', '-', '+', '/', '(', ')', '\t', '\r', '>' };
@@ -23,7 +24,7 @@ public static class LexicalAnalyzer
                     break;
                 case ' ':
                 case '\t':
-                    lexemes.Add(new Lexeme(LexemeType.Whitespace, " \'  \'", index));
+                    //lexemes.Add(new Lexeme(LexemeType.Whitespace, " \'  \'", index));
                     break;
                 case '\r':
                 case '\n':
@@ -42,14 +43,14 @@ public static class LexicalAnalyzer
                 case '*':
                     lexemes.Add(new Lexeme(LexemeType.SignMultiply, currentChar.ToString(), index));
                     break;
-                case '/':
+                case ':':
                     lexemes.Add(new Lexeme(LexemeType.SignDevide, currentChar.ToString(), index));
                     break;
                 case ')':
                     lexemes.Add(new Lexeme(LexemeType.CloseBracket, currentChar.ToString(), index));
                     break;
                 default:
-                   if (char.IsDigit(currentChar))
+                    if (char.IsDigit(currentChar))
                     {
                         int startIndex = index;
                         while (index < rawText.Length && (char.IsDigit(rawText[index]) || rawText[index] == '.'))
@@ -65,27 +66,28 @@ public static class LexicalAnalyzer
                             }
                             index++;
                         }
-                        int endIndex = index - 1;
+                        //int endIndex = index - 1;
+                        int endIndex = index - 1; // Исправление: использование правильного endIndex
                         string number = rawText.Substring(startIndex, endIndex - startIndex + 1);
                         if (number.Contains('.'))
                         {
-                            lexemes.Add(new Lexeme(LexemeType.Float, number, startIndex, endIndex));
+                            lexemes.Add(new Lexeme(LexemeType.Float, number, startIndex));
                         }
                         else
                         {
-                            lexemes.Add(new Lexeme(LexemeType.Integer, number, startIndex, endIndex));
+                            lexemes.Add(new Lexeme(LexemeType.Integer, number, startIndex));
                         }
                         index--;
                     }
                     else if (char.IsLetter(currentChar))
                     {
                         var startIndex = index;
-                        while(index + 1 < rawText.Length && (!ReservedLexicals.Contains(rawText[index + 1]))) 
+                        while (index + 1 < rawText.Length && (!ReservedLexicals.Contains(rawText[index + 1])))
                         {
                             index++;
                         }
 
-                        lexemes.Add(new Lexeme(LexemeType.Identifier, rawText.Substring(startIndex, index - startIndex + 1), startIndex, index + 1));
+                        lexemes.Add(new Lexeme(LexemeType.Identifier, rawText.Substring(startIndex, index - startIndex + 1), startIndex));
                     }
                     else
                     {
@@ -95,11 +97,7 @@ public static class LexicalAnalyzer
             }
             index++;
         }
-        if (lexemes.Count != 0)
-        {
-            lexemes.Last().EndIndex--;
-        }
         return lexemes;
     }
-
 }
+

@@ -73,10 +73,6 @@
                 <ComboBoxItem Content="16"/>
                 <ComboBoxItem Content="18"/>
             </ComboBox>
-
-            <CheckBox Margin="5" IsChecked="{Binding UseRecline}">
-                <materialDesign:PackIcon Kind="ErrorOutline" />
-            </CheckBox>
             
             <Button Command="{Binding UndoButtonClick}">
                 <materialDesign:PackIcon Kind="UndoVariant" Margin="5"/>

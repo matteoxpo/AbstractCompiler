@@ -58,9 +58,7 @@ public partial class MainWindow : Window
             _selectedError = value;
             if (_selectedError != null)
             {
-                var start = value.StartIndex;
-                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0;
-                textEditor.Select(start, len);
+                textEditor.Select(value.StartIndex, value.Length);
             }
         }
     }
@@ -74,13 +72,10 @@ public partial class MainWindow : Window
             _selectedLexeme = value;
             if (_selectedLexeme != null)
             {
-                var len = value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 1;
-                textEditor.Select(value.StartIndex, value.EndIndex - value.StartIndex > 0 ? value.EndIndex - value.StartIndex : 0);
+                textEditor.Select(value.StartIndex, value.Length);
             }
         }
     }
-
-    public bool UseRecline { get;   set; }
 
     // Файл
     public ICommand CreateButtonClick { get; }
@@ -440,7 +435,7 @@ public partial class MainWindow : Window
     private void LexiaclParse()
     {
         WrongLexemes.Clear();
-        foreach (var error in Parser.Parse(Lexemes, UseRecline))
+        foreach (var error in Parser.Parse(Lexemes.ToList()))
         {
             WrongLexemes.Add(error);
         }

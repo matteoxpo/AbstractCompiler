@@ -2,21 +2,21 @@
 
 public class ParsedError
 {
-    public ParsedError(string message, int startIndex, int endIndex)
+    public ParsedError(string message, int startIndex, int length)
     {
         Message = new string(message);
         StartIndex = startIndex;
-        EndIndex = endIndex;
+        Length = length;
     }
 
     public string Message { get; set; }
     public int StartIndex { get; set; }
-    public int EndIndex { get; set; }
-    public string Position { get => $"{StartIndex}: {EndIndex}"; }
+    public int Length { get; set; } 
+    public string Position { get => $"{StartIndex}: {StartIndex + Length}"; }
 
     public override string ToString()
     {
-        return $"Error: {Message}, Position: {StartIndex}-{EndIndex}";
+        return $"Error: {Message}, Position: {StartIndex}-{Length}";
     }
 
 }
