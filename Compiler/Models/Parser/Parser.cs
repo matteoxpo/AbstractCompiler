@@ -59,7 +59,7 @@ namespace Compiler.Models.Parser
         {
             if (Match(new List<LexemeType>() { LexemeType.Identifier, LexemeType.Integer, LexemeType.Float }))
             {
-                CheckIsArgumentDeclared();
+                //CheckIsArgumentDeclared();
             }
         }
         private static void MatchNum() 
@@ -127,10 +127,8 @@ namespace Compiler.Models.Parser
 
         private static void ARROW()
         {
-            if (Match(LexemeType.SignMore))
-            {
-                FIRST_OPERAND();
-            }
+            Match(LexemeType.SignMore);
+            FIRST_OPERAND();
         }
 
         private static void FIRST_OPERAND()
@@ -167,14 +165,11 @@ namespace Compiler.Models.Parser
         {
             foreach(var arg in _usedArgs)
             {
-                if (Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, false)) 
-                {
-                    //Consume(); 
-                }
+                Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, false); 
                 Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer});
             }
             Match(LexemeType.EndOfExpression);
-            ReportUnusedArguments();
+            //ReportUnusedArguments();
         }
      
         private static void Neutralization(IEnumerable<LexemeType> expectedType) 
@@ -186,7 +181,6 @@ namespace Compiler.Models.Parser
 
             while (parseIndex < _lexemes.Count && !expectedType.Contains(_lexemes[parseIndex].Type))
             {
-                Console.WriteLine(_lexemes[parseIndex].Type);
                 parseIndex++;
             }
 
