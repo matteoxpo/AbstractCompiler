@@ -163,7 +163,7 @@ namespace Compiler.Models.Parser
 
         private static void NUMS() 
         {
-            foreach(var arg in _usedArgs)
+            //foreach(var arg in _usedArgs)
             {
                 Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, false); 
                 Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer});
