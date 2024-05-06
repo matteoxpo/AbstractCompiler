@@ -3,7 +3,19 @@
 namespace Compiler.Models.Lexical;
 public static class LexicalAnalyzer
 {
-    public static List<char> ReservedLexicals = new List<char>() { ' ', '\n', '\\', '-', '+', '/', '(', ')', '\t', '\r', '>' };
+    public static List<char> ReservedLexicals = new List<char>() { ' ', '\n', '\\', '-', '+', '/', '(', ')', '\t', '\r', '>', ';' };
+    public static List<char> chars = new List<char>()
+        {
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+        };
+    public static List<char> digits = new List<char>()
+        {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+        };
+
     public static List<Lexeme> Analyze(string rawText)
     {
         var lexemes = new List<Lexeme>();
@@ -50,10 +62,10 @@ public static class LexicalAnalyzer
                     lexemes.Add(new Lexeme(LexemeType.CloseBracket, currentChar.ToString(), index));
                     break;
                 default:
-                    if (char.IsDigit(currentChar))
+                    if (digits.Contains(currentChar))
                     {
                         int startIndex = index;
-                        while (index < rawText.Length && (char.IsDigit(rawText[index]) || rawText[index] == '.'))
+                        while (index < rawText.Length && (digits.Contains(rawText[index]) || rawText[index] == '.'))
                         {
                             if (rawText[index] == '.')
                             {
@@ -79,7 +91,7 @@ public static class LexicalAnalyzer
                         }
                         index--;
                     }
-                    else if (char.IsLetter(currentChar))
+                    else if (chars.Contains(currentChar))
                     {
                         var startIndex = index;
                         while (index + 1 < rawText.Length && (!ReservedLexicals.Contains(rawText[index + 1])))

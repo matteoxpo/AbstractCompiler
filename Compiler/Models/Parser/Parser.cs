@@ -10,20 +10,15 @@ namespace Compiler.Models.Parser
     public static class Parser
     {
         private static List<Lexeme>? _lexemes;
-        private static bool[] isReclined;
         private static int _currentIndex;
         private static List<ParsedError> _errors;
         private static Lexeme CurrentLexeme => _lexemes[_currentIndex];
 
-        private static List<(Lexeme, bool)> _usedArgs;
-
-        private static Stack<char> _openBrackets;
-
         private static void Consume() => _currentIndex++;
         
         private static void ReportError(string message, int startIndex, int length) => _errors.Add(new ParsedError(message, startIndex, length));
-        private static bool Match(LexemeType expectedType, bool useNeutralization = true) => Match(new List<LexemeType> { expectedType }, useNeutralization);
-        private static bool Match(IEnumerable<LexemeType> expectedType, bool useNeutralization = true)
+        private static bool Match(LexemeType expectedType, List<LexemeType>? boundaryLexemes) => Match(new List<LexemeType> { expectedType }, boundaryLexemes);
+        private static bool Match(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes)
         {
             if (_currentIndex < _lexemes.Count)
             {
@@ -39,32 +34,28 @@ namespace Compiler.Models.Parser
                         return true;
                     }
                 }
-                if (useNeutralization)
+                if (boundaryLexemes != null)
                 {
-                    Neutralization(expectedType);
+                    Neutralization(expectedType, boundaryLexemes);
                 }
                 return false;
             }
-            throw new EarlyEndOfExpressionException();
+            else 
+            {
+                ReportError(CreateExpectedTypeMessage(expectedType), _lexemes[_currentIndex - 1].StartIndex, _lexemes[_currentIndex - 1].StartIndex - _lexemes[_currentIndex - 1].EndIndex);
+            }
+            return false;
         }
         private static void MatchOperation() 
         {
-            if (!Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus, LexemeType.SignDevide, LexemeType.SignMultiply }, false))
+            if (!Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus, LexemeType.SignDevide, LexemeType.SignMultiply }, null))
             {
-                ReportError($"Ожидалась операция [{LexemeType.SignPlus}, {LexemeType.SignMinus}, {LexemeType.SignDevide}, {LexemeType.SignMultiply}], пришло: {CurrentLexeme.Type}", CurrentLexeme.StartIndex, CurrentLexeme.Value.Length);
-                Consume();
+                ReportError($"Ожидалась операция [{LexemeType.SignPlus}, {LexemeType.SignMinus}, {LexemeType.SignDevide}, {LexemeType.SignMultiply}], пришло: {CurrentLexeme.Type}", CurrentLexeme.StartIndex - 1, 1);
+                if (CurrentLexeme.Type != LexemeType.Identifier)
+                {
+                    Consume();
+                }
             }
-        }
-        private static void MatchOperand()
-        {
-            if (Match(new List<LexemeType>() { LexemeType.Identifier, LexemeType.Integer, LexemeType.Float }))
-            {
-                //CheckIsArgumentDeclared();
-            }
-        }
-        private static void MatchNum() 
-        { 
-        
         }
 
         public static List<ParsedError> Parse(List<Lexeme> lexemes)
@@ -72,8 +63,6 @@ namespace Compiler.Models.Parser
             _lexemes = lexemes;
             _currentIndex = 0;
             _errors = new List<ParsedError>();
-            _usedArgs = new List<(Lexeme, bool)>();
-            _openBrackets = new Stack<char>();
 
             try
             {
@@ -99,13 +88,13 @@ namespace Compiler.Models.Parser
                 Consume();
             }
 
-            Match(LexemeType.OpenBracket);
-            Match(LexemeType.InverseSlash);
+            Match(LexemeType.OpenBracket, new List<LexemeType> { LexemeType.InverseSlash});
+            Match(LexemeType.InverseSlash, new List<LexemeType> { LexemeType.Identifier});
             ARGFUNC();
         }
         private static void ARGFUNC()
         {
-            if (Match(LexemeType.SignMinus, false))
+            if (Match(LexemeType.SignMinus, null))
             {
                 ARROW();
             }
@@ -117,81 +106,99 @@ namespace Compiler.Models.Parser
 
         private static void ARGFUNCREM()
         {
-            if (Match(LexemeType.Identifier))
-            {
-                _usedArgs.Add((_lexemes[_currentIndex - 1], false));
-            }
+            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus });
                 
             ARGFUNC();
         }
 
         private static void ARROW()
         {
-            Match(LexemeType.SignMore);
+            Match(LexemeType.SignMore, new List<LexemeType> { LexemeType.Identifier });
             FIRST_OPERAND();
         }
 
         private static void FIRST_OPERAND()
         {
-            CheckCloseBracketBeforeOperand();
-            CheckOpenBracket();
-            MatchOperand();
+            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.SignMultiply, LexemeType.SignDevide });   
             OPERATION();
         }
 
         private static void OPERATION()
         {
-            CheckCloseBracketBeforeOperation();
-            MatchOperation();
-            CheckOpenBracket();
-            OTHER_OPERANDS();
+            //MatchOperation();
+            Match(new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.SignMultiply, LexemeType.SignDevide }, new List<LexemeType> { LexemeType.Identifier });
+            SECOND_OPERAND();
         }
 
-        private static void OTHER_OPERANDS()
+        private static void SECOND_OPERAND()
         {
-            MatchOperand();
-
-            if (!CheckCloseBracketAfterOperand()) 
+            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.SignMultiply, LexemeType.SignDevide });
+            if (Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus, LexemeType.SignDevide, LexemeType.SignMultiply }, null))
             {
-                NUMS();
+                SECOND_OPERAND();
             }
-            else
+            else 
             {
-                OPERATION();
+               Match(LexemeType.CloseBracket, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.Float, LexemeType.Integer});
+               NUMS();
             }
         }
 
         private static void NUMS() 
         {
-            //foreach(var arg in _usedArgs)
-            {
-                Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, false); 
-                Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer});
-            }
-            Match(LexemeType.EndOfExpression);
-            //ReportUnusedArguments();
+            Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, null); 
+            Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer}, new List<LexemeType> { LexemeType.SignMore, LexemeType.SignPlus, LexemeType.Identifier});
+            Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus }, null);
+            Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer}, new List<LexemeType> { LexemeType.EndOfExpression });
+            Match(LexemeType.EndOfExpression, new List<LexemeType> { });
         }
      
-        private static void Neutralization(IEnumerable<LexemeType> expectedType) 
+        private static void Neutralization(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes) 
         {
             var message = CreateExpectedTypeMessage(expectedType);
             
             var startIndex = CurrentLexeme.StartIndex;
             var parseIndex = _currentIndex;
 
+            var isBounded = false;
+            if (parseIndex < _lexemes.Count && boundaryLexemes!.Contains(_lexemes[parseIndex].Type))
+            {
+                isBounded = true;
+            }
+
             while (parseIndex < _lexemes.Count && !expectedType.Contains(_lexemes[parseIndex].Type))
             {
                 parseIndex++;
             }
-
             if (parseIndex >= _lexemes.Count)
             {
-                ReportError(message, startIndex, CurrentLexeme.Value.Length);
+                var parseIndex_2 = _currentIndex;
+                while(parseIndex_2 < _lexemes.Count && !boundaryLexemes!.Contains(_lexemes[parseIndex_2].Type))
+                {
+                    parseIndex_2++;
+                }
+                if (!boundaryLexemes.Contains(CurrentLexeme.Type)) 
+                { 
+                    ReportError(message, startIndex, CurrentLexeme.Value.Length);
+                }
+                else
+                {
+                    ReportError(CreateSkipedTypeMessage(expectedType), startIndex, 1);
+                }
             }
             else
             {
+                if (isBounded && !expectedType.Contains(_lexemes[parseIndex].Type))
+                {
+                    ReportError(CreateSkipedTypeMessage(expectedType), _lexemes[_currentIndex - 1].EndIndex, 1);
+                    return;
+                }
+                for (var i = _currentIndex; i < parseIndex; i++) 
+                {
+                //ReportError(message + $"\nОткинутые элементы с {startIndex} по {_lexemes[parseIndex - 1].EndIndex}", startIndex, _lexemes[parseIndex - 1].EndIndex - startIndex);
+                    ReportError(message + $"\nОткинут элемен с {_lexemes[i].StartIndex} по {_lexemes[i].EndIndex}", _lexemes[i].StartIndex, _lexemes[i].EndIndex - _lexemes[i].StartIndex);
+                }
                 _currentIndex = parseIndex;
-                ReportError(message + $"\nОткинутые элементы с {startIndex} по {_lexemes[parseIndex - 1].EndIndex}", startIndex, _lexemes[parseIndex - 1].EndIndex - startIndex);
             }
 
             Consume();
@@ -208,114 +215,34 @@ namespace Compiler.Models.Parser
                 types.Append(type.ToString() + ((expectedType.Count() > 1 && i < expectedType.Count() - 1) ? ", " : ""));
                 i++;            
             }
-            return new string($"Ожидалось:[ {types} ], пришло {CurrentLexeme.Type}");
-        }
-     
-        private static void CheckIsArgumentDeclared()
-        {
-            var checkedLexeme = _lexemes[_currentIndex - 1];
-            if (checkedLexeme.Type != LexemeType.Identifier)
+            try
             {
-                return;
+                var currentType = CurrentLexeme.Type.ToString();
+                return new string($"Ожидалось:[ {types} ], пришло {currentType}");
             }
+            catch 
+            {
+                return new string($"Ожидалось:[ {types} ], выражение кончилось");
+            }
+        }
+        private static string CreateSkipedTypeMessage(IEnumerable<LexemeType> expectedType)
+        {
+            var types = new StringBuilder();
 
-            var updatedArgs = new List<(Lexeme, bool)>();
-            bool isInArgs = false;
-            foreach (var arg in _usedArgs)
+            int i = 0;
+            foreach (var type in expectedType)
             {
-                if (arg.Item1.Value == checkedLexeme.Value)
-                {
-                    updatedArgs.Add((arg.Item1, true));
-                    isInArgs = true;
-                }
-                else
-                {
-                    updatedArgs.Add(arg);
-                }
+                types.Append(type.ToString() + ((expectedType.Count() > 1 && i < expectedType.Count() - 1) ? ", " : ""));
+                i++;
             }
-
-            _usedArgs = updatedArgs;
-            if (!isInArgs)
+            try
             {
-                ReportError($"Имя '{checkedLexeme.Value}' не существует в текущем контексте", checkedLexeme.StartIndex, checkedLexeme.Value.Length);
+                var currentType = CurrentLexeme.Type.ToString();
+                return new string($"Пропущено:[ {types} ]");
             }
-        }
-        private static void ReportUnusedArguments()
-        {
-            foreach (var arg in _usedArgs)
+            catch
             {
-                if (!arg.Item2)
-                {
-                    ReportError($"Неиспользованный аргумент с именем '{arg.Item1.Value}'", arg.Item1.StartIndex, arg.Item1.Value.Length);
-                }
-            }
-        }
-        private static bool CheckOpenBracket()
-        {
-            bool isMatched = false;
-            while (Match(LexemeType.OpenBracket, false))
-            {
-                isMatched = true;
-                _openBrackets.Push('(');
-            }
-            return isMatched;
-        }
-        private static void CheckCloseBracketBeforeOperation() 
-        {
-            while (Match(LexemeType.CloseBracket, false))
-            {
-                if (_openBrackets.Count() == 0)
-                {
-                    ReportError("Закрывающая скобка без открывающей", _lexemes[_currentIndex - 1].StartIndex, _lexemes[_currentIndex - 1].Value.Length);
-                }
-                else
-                {
-                    _openBrackets.Pop();
-                }
-            }
-        }
-   
-        private static bool CheckCloseBracketAfterOperand() 
-        {
-            if (Match(LexemeType.CloseBracket, false))
-            {
-                if (_openBrackets.Count() == 0)
-                {
-                    return false;
-                }
-                else 
-                {
-                    _openBrackets.Pop();
-                    bool isMatched = Match(LexemeType.CloseBracket, false);
-                    while (isMatched && _openBrackets.Count() != 0)
-                    {
-                        isMatched = Match(LexemeType.CloseBracket, false);
-                        _openBrackets.Pop();
-                    }
-                    if (isMatched && _openBrackets.Count() == 0) 
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-            }
-            return true;
-
-        }
-
-        private static void CheckCloseBracketBeforeOperand()
-        {
-            while (Match(LexemeType.CloseBracket, false))
-            {
-                if (_openBrackets.Count() == 0)
-                {
-                    ReportError("Закрывающая скобка без открывающей", _lexemes[_currentIndex - 1].StartIndex, _lexemes[_currentIndex - 1].Value.Length);
-                }
-                ReportError("Закрывающая скобка логически неправильно расположена", _lexemes[_currentIndex - 1].StartIndex, _lexemes[_currentIndex - 1].Value.Length);
-
+                return new string($"Пропущено:[ {types} ]");
             }
         }
     }

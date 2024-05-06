@@ -137,7 +137,7 @@
 
 | № | Тема | Пример верной строки | Справка |
 | ------ | ------ | ------ | ------ |
-| 51 | Лямбда выражение языка Haskell | (\x y -> x * y) 10 4 | [ссылка](https://www.ohaskell.guide/lambda-function.html) |
+| 51 | Лямбда выражение языка Haskell | (\x y -> x * y) 10 4; | [ссылка](https://www.ohaskell.guide/lambda-function.html) |
 
 [Примеры допустимых строк](#примеры-допустимых-строк)
 
@@ -167,7 +167,7 @@ V<sub>N</sub> = {
    ARROW,
    ARG1REM,
    OPERATION,
-   ARG1, ARG2,
+   ARG1, OTHERARGS,
    CLOSE,
    NUMBER1, NUMBER2,
    INT1, INT2,
@@ -179,24 +179,24 @@ V<sub>N</sub> = {
 P = {
 1) LF → (\ ARGFUNC 
 2) ARGFUNC → letter ARGFUNCREM  | "-" ARROW 
-3) ARGFUNCREM → (letter |  | digit) ARGFUNCREM | " " ARGFUNC  | "-" ARROW 
+3) ARGFUNCREM → letter  ARGFUNCREM | " "  ARGFUNCREM | digit ARGFUNCREM | " " ARGFUNC  | "-" ARROW 
 4) ARROW → > ARG1
 5) ARG1 → letter ARG1REM
-6) ARG1REM → (letter |  | digit) ARG1REM | (+ | - | * | /) OPERATION
-7) OPERATION → letter ARG2
-8) ARG2 → (letter |  | digit) ARG2 | ) CLOSE 
-9) CLOSE → [+ | -] NUMBER1 
+6) ARG1REM → letter ARG1REM | " " ARG1REM | digit ARG1REM | "+" OPERATION | "-" OPERATION | "*" OPERATION | ":" OPERATION
+7) OPERATION → letter OTHERARGS
+8) OTHERARGS → letter OTHERARGS | " " OTHERARGS | digit OTHERARGS | ")" CLOSE | + OPERATION | "-" OPERATION | "*" | / OPERATION
+9) CLOSE → ["+" | "-"] NUMBER1 
 10) NUMBER1 → digit INT1
-11) INT1 → digit INT1 | . DECIMAL1 | " " SPACENUM 
+11) INT1 → digit INT1 | "." DECIMAL1 | " " SPACENUM 
 12) DECIMAL1 → digit DECIMAL1REM 
 13) DECIMAL1REM → digit DECIMAL1REM | " " SPACENUM
-14) SPACENUM → [+ | -] NUMBER2
+14) SPACENUM → ["+" | "-"] NUMBER2
 15) NUMBER2 → digit INT2
-16) INT2 → digit INT2 | . DECIMAL2 | ; 
+16) INT2 → digit INT2 | "." DECIMAL2 | ";" 
 17) DECIMAL2 → digit DECIMAL2REM 
 18) DECIMAL2REM → digit DECIMAL2REM | ;
-19) letter → ‘a’ | ‘b’ | … | ‘z’ | ‘A’ | ‘B’ | … | ‘Z’
-20) digit → ‘0’ | ‘1’ | … | ‘9’
+19) letter → "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+20) "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 }
 
 ### Классификация грамматики
