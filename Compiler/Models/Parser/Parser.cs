@@ -82,9 +82,9 @@ namespace Compiler.Models.Parser
             Match(LexemeType.InverseSlash, new List<LexemeType> { LexemeType.SignMinus});
             ARGFUNC();
         }
-        private static void ARGFUNC()
+        private static void ARGFUNC(bool isMinusSkiped = false)
         {
-            if (Match(LexemeType.SignMinus, null))
+            if (Match(LexemeType.SignMinus, null) || isMinusSkiped)
             {
                 ARROW();
             }
@@ -96,9 +96,17 @@ namespace Compiler.Models.Parser
 
         private static void ARGFUNCREM()
         {
-            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus });
-                
-            ARGFUNC();
+            if (Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignMore }))
+            {
+                ARGFUNC();
+            }
+            else
+            {
+                _errors.Last().Message = "Пропщуено: [SignMinus]";
+                ARGFUNC(true);
+            }
+
+
         }
 
         private static void ARROW()
@@ -122,7 +130,7 @@ namespace Compiler.Models.Parser
 
         private static void SECOND_OPERAND()
         {
-            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.SignMultiply, LexemeType.SignDevide });
+            Match(LexemeType.Identifier, new List<LexemeType> { LexemeType.SignMinus, LexemeType.SignPlus, LexemeType.SignMultiply, LexemeType.SignDevide, LexemeType.CloseBracket });
             if (Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus, LexemeType.SignDevide, LexemeType.SignMultiply }, null))
             {
                 SECOND_OPERAND();
