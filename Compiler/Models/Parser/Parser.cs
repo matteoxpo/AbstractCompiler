@@ -142,25 +142,25 @@ namespace Compiler.Models.Parser
             Match(LexemeType.EndOfExpression, new List<LexemeType> { });
         }
 
-        private static void Neutralization(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes) 
+        private static void Neutralization(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes)
         {
             var messageExpType = CreateExpectedTypeMessage(expectedType);
             var messageSkipedType = CreateSkipedTypeMessage(expectedType);
-            
+
             var startIndex = CurrentLexeme.StartIndex;
 
             var parseIndex = _currentIndex;
 
-            while(parseIndex < _lexemes.Count) 
+            while (parseIndex < _lexemes.Count)
             {
-                if (expectedType.Contains(_lexemes[parseIndex].Type)) 
+                if (expectedType.Contains(_lexemes[parseIndex].Type))
                 {
                     ReportError(messageExpType, startIndex, _lexemes[parseIndex - 1].EndIndex - startIndex);
                     _currentIndex = parseIndex;
                     Consume();
                     return;
                 }
-                if (boundaryLexemes!.Contains(_lexemes[parseIndex].Type)) 
+                if (boundaryLexemes!.Contains(_lexemes[parseIndex].Type))
                 {
                     ReportError(messageSkipedType, startIndex, 1);
                     _currentIndex = parseIndex;
@@ -169,7 +169,10 @@ namespace Compiler.Models.Parser
                 parseIndex++;
             }
             ReportError(messageSkipedType, startIndex, 1);
-            Consume();
+            if (parseIndex < _lexemes.Count)
+            {
+                Consume();
+            }
 
         }
 

@@ -58,7 +58,15 @@ public partial class MainWindow : Window
             _selectedError = value;
             if (_selectedError != null)
             {
-                textEditor.Select(value.StartIndex, value.Length);
+                try
+                {
+                    textEditor.Select(value.StartIndex, value.Length);
+
+                }
+                catch (ArgumentOutOfRangeException ex) 
+                {
+                    textEditor.Select(textEditor.Text.Length - 1, 1);
+                }
             }
         }
     }
