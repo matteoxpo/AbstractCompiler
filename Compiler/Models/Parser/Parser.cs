@@ -42,7 +42,8 @@ namespace Compiler.Models.Parser
             }
             else 
             {
-                ReportError(CreateExpectedTypeMessage(expectedType), _lexemes[_currentIndex - 1].StartIndex, _lexemes[_currentIndex - 1].StartIndex - _lexemes[_currentIndex - 1].EndIndex);
+                ReportError(CreateExpectedTypeMessage(expectedType), _lexemes.Last().StartIndex, _lexemes.Last().Length);
+                throw new EarlyEndOfExpressionException();
             }
             return false;
         }

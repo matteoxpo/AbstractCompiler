@@ -177,7 +177,7 @@ V<sub>N</sub> = {
 }
 
 P = {
-1) LF → (\ ARGFUNC 
+1) LF → "(\" ARGFUNC 
 2) ARGFUNC → letter ARGFUNCREM  | "-" ARROW 
 3) ARGFUNCREM → letter  ARGFUNCREM | " "  ARGFUNCREM | digit ARGFUNCREM | " " ARGFUNC  | "-" ARROW 
 4) ARROW → > ARG1
@@ -194,7 +194,7 @@ P = {
 15) NUMBER2 → digit INT2
 16) INT2 → digit INT2 | "." DECIMAL2 | ";" 
 17) DECIMAL2 → digit DECIMAL2REM 
-18) DECIMAL2REM → digit DECIMAL2REM | ;
+18) DECIMAL2REM → digit DECIMAL2REM | ";"
 19) letter → "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 20) "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 }
