@@ -46,17 +46,6 @@ namespace Compiler.Models.Parser
             }
             return false;
         }
-        private static void MatchOperation() 
-        {
-            if (!Match(new List<LexemeType>() { LexemeType.SignPlus, LexemeType.SignMinus, LexemeType.SignDevide, LexemeType.SignMultiply }, null))
-            {
-                ReportError($"Ожидалась операция [{LexemeType.SignPlus}, {LexemeType.SignMinus}, {LexemeType.SignDevide}, {LexemeType.SignMultiply}], пришло: {CurrentLexeme.Type}", CurrentLexeme.StartIndex - 1, 1);
-                if (CurrentLexeme.Type != LexemeType.Identifier)
-                {
-                    Consume();
-                }
-            }
-        }
 
         public static List<ParsedError> Parse(List<Lexeme> lexemes)
         {
@@ -89,7 +78,7 @@ namespace Compiler.Models.Parser
             }
 
             Match(LexemeType.OpenBracket, new List<LexemeType> { LexemeType.InverseSlash});
-            Match(LexemeType.InverseSlash, new List<LexemeType> { LexemeType.Identifier});
+            Match(LexemeType.InverseSlash, new List<LexemeType> { LexemeType.SignMinus});
             ARGFUNC();
         }
         private static void ARGFUNC()
@@ -152,8 +141,39 @@ namespace Compiler.Models.Parser
             Match(new List<LexemeType>() { LexemeType.Float, LexemeType.Integer}, new List<LexemeType> { LexemeType.EndOfExpression });
             Match(LexemeType.EndOfExpression, new List<LexemeType> { });
         }
-     
+
         private static void Neutralization(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes) 
+        {
+            var messageExpType = CreateExpectedTypeMessage(expectedType);
+            var messageSkipedType = CreateSkipedTypeMessage(expectedType);
+            
+            var startIndex = CurrentLexeme.StartIndex;
+
+            var parseIndex = _currentIndex;
+
+            while(parseIndex < _lexemes.Count) 
+            {
+                if (expectedType.Contains(_lexemes[parseIndex].Type)) 
+                {
+                    ReportError(messageExpType, startIndex, _lexemes[parseIndex - 1].EndIndex - startIndex);
+                    _currentIndex = parseIndex;
+                    Consume();
+                    return;
+                }
+                if (boundaryLexemes!.Contains(_lexemes[parseIndex].Type)) 
+                {
+                    ReportError(messageSkipedType, startIndex, 1);
+                    _currentIndex = parseIndex;
+                    return;
+                }
+                parseIndex++;
+            }
+            ReportError(messageSkipedType, startIndex, 1);
+            Consume();
+
+        }
+
+        private static void Neutraliz(IEnumerable<LexemeType> expectedType, List<LexemeType>? boundaryLexemes) 
         {
             var message = CreateExpectedTypeMessage(expectedType);
             
@@ -172,14 +192,23 @@ namespace Compiler.Models.Parser
             }
             if (parseIndex >= _lexemes.Count)
             {
-                var parseIndex_2 = _currentIndex;
-                while(parseIndex_2 < _lexemes.Count && !boundaryLexemes!.Contains(_lexemes[parseIndex_2].Type))
+                if (boundaryLexemes != null)
                 {
-                    parseIndex_2++;
-                }
-                if (!boundaryLexemes.Contains(CurrentLexeme.Type)) 
-                { 
-                    ReportError(message, startIndex, CurrentLexeme.Value.Length);
+                    var parseIndex_2 = _currentIndex;
+                    while (parseIndex_2 < _lexemes.Count && !boundaryLexemes.Contains(_lexemes[parseIndex_2].Type))
+                    {
+                        parseIndex_2++;
+                    }
+                    if (parseIndex_2 < _lexemes.Count)
+                    {
+                        _currentIndex = parseIndex_2;
+                        ReportError(message, startIndex, CurrentLexeme.Value.Length);
+                        Consume();
+                    }
+                    else 
+                    {
+                        ReportError(CreateSkipedTypeMessage(expectedType), startIndex, 1);
+                    }
                 }
                 else
                 {
@@ -199,9 +228,10 @@ namespace Compiler.Models.Parser
                     ReportError(message + $"\nОткинут элемен с {_lexemes[i].StartIndex} по {_lexemes[i].EndIndex}", _lexemes[i].StartIndex, _lexemes[i].EndIndex - _lexemes[i].StartIndex);
                 }
                 _currentIndex = parseIndex;
+                Consume();
+
             }
 
-            Consume();
 
         }
 
