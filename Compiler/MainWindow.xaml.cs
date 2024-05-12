@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Compiler.Models.Lexical;
 using Compiler.Models.Parser;
 using Compiler.Models;
+using Compiler.Models.MRegex;
 
 namespace Compiler;
 public class RelayCommand : ICommand
@@ -48,6 +49,7 @@ public partial class MainWindow : Window
 
     public ObservableCollection<Lexeme> Lexemes { get; set; } = new();
     public ObservableCollection<ParsedError> WrongLexemes { get; set; } = new();
+    public ObservableCollection<RegexCorrectValue> RegexCorrectValues { get; set; } = new();
 
     private ParsedError _selectedError;
     public ParsedError SelectedError
@@ -70,8 +72,8 @@ public partial class MainWindow : Window
             }
         }
     }
+    
     private Lexeme _selectedLexeme;
-
     public Lexeme SelectedLexeme
     {
         get => _selectedLexeme;
@@ -85,6 +87,20 @@ public partial class MainWindow : Window
         }
     }
 
+    private RegexCorrectValue _selectedCorrectRegex;
+    public RegexCorrectValue SelectedCorrectRegex
+    {
+        get => _selectedCorrectRegex;
+        set
+        {
+            _selectedCorrectRegex = value;
+            if (_selectedCorrectRegex != null)
+            {
+                textEditor.Select(value.StartIndex, value.Length);
+            }
+        }
+    }
+    
     // Файл
     public ICommand CreateButtonClick { get; }
     public ICommand OpenButtonClick { get; }
@@ -335,6 +351,7 @@ public partial class MainWindow : Window
     {
         LexicalAnalysis();
         LexiaclParse();
+        RegexParser();
     }
 
 
@@ -431,7 +448,6 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
     }
-
     private void LexicalAnalysis()
     {
         Lexemes.Clear();
@@ -446,6 +462,14 @@ public partial class MainWindow : Window
         foreach (var error in Parser.Parse(Lexemes.ToList()))
         {
             WrongLexemes.Add(error);
+        }
+    }
+    private void RegexParser() 
+    {
+        RegexCorrectValues.Clear();
+        foreach (var regCorrectValue in Models.MRegex.RegexParser.Parse(textEditor.Text)) 
+        {
+            RegexCorrectValues.Add(regCorrectValue);
         }
     }
 

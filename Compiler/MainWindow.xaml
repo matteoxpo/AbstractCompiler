@@ -143,6 +143,17 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
+            <TabItem Header="Regex" VerticalAlignment="Stretch">
+                <DataGrid x:Name="regexAnalyzDataGrid" SelectedItem="{Binding SelectedCorrectRegex}" ItemsSource="{Binding RegexCorrectValues, Mode=OneWay}" AlternationCount="{Binding regexCorrect.Count}" GridLinesVisibility="All" AutoGenerateColumns="False" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="№" Binding="{Binding AlternationIndex, RelativeSource={RelativeSource AncestorType=DataGridRow}}"  DisplayIndex="0"/>
+                        <DataGridTextColumn Header="Значение" Binding="{Binding Value, Mode=OneWay}" DisplayIndex="1"/>
+                        <DataGridTextColumn Header="Правило регулярного выражения" Binding="{Binding RegexRule, Mode=OneWay}" DisplayIndex="2"/>
+                        <DataGridTextColumn Header="Местоположение" Binding="{Binding Position, Mode=OneWay}" DisplayIndex="3"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>
