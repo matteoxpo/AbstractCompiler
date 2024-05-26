@@ -56,7 +56,6 @@ public class RecursiveDescentParser
         E1();
         if (Match("⇒"))
         {
-            Consume();
             E1();
         }
     }
@@ -75,7 +74,6 @@ public class RecursiveDescentParser
         E3();
         if (Match("∧"))
         {
-            Consume();
             E3();
         }
     }
@@ -84,7 +82,6 @@ public class RecursiveDescentParser
     {
         if (Match("¬"))
         {
-            Consume();
             E4();
         }
         else
@@ -128,14 +125,14 @@ public class RecursiveDescentParser
         } 
         else 
         {
-            //throw new Exception("Early end of expr");    
+            throw new Exception("Early end of expr");
         }
 
         while(index < input.Length && (char.IsLetter(input[index]) || char.IsDigit(input[index] ))) 
         {
             Consume();
         }
-        result.AddMessage($"exp:var_name got: {input.Substring(startIndex, index - startIndex)}");
+        result.AddMessage($"exp:var_name got: {input[index]}");
         return true;
     }
 
@@ -144,7 +141,7 @@ public class RecursiveDescentParser
         SkipSpace();
         if (index + expected.Length <= input.Length && input.Substring(index, expected.Length) == expected)
         {
-            result.AddMessage($"exp:{expected} got: {input.Substring(index, expected.Length)} next");
+            result.AddMessage($"exp:{expected} got: {input.Substring(index, expected.Length)}");
             Consume();
             return true;
         }

@@ -352,7 +352,7 @@ public partial class MainWindow : Window
     public void Start(object parameter)
     {
         //LexicalAnalysis();
-        LexiaclParse();
+        //LexiaclParse();
         RegexParser();
         ParseDescent(); 
     }
