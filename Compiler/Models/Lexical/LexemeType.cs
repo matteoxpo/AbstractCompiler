@@ -17,7 +17,6 @@
         SignMore,               // >
         EndOfExpression,        // ;
 
-
         InvalidCharacter        // ОШИБКА
     }
 }

@@ -154,6 +154,21 @@
                 </DataGrid>
 
             </TabItem>
+            <TabItem Header="Parse G[E]" VerticalAlignment="Stretch">
+                <DataGrid x:Name="parseDescent"  ItemsSource="{Binding ParsingResults, Mode=OneWay}" GridLinesVisibility="All" AutoGenerateColumns="False" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Успех" Binding="{Binding Success, Mode=OneWay}" Width="*" DisplayIndex="0"/>
+                        <DataGridTextColumn Header="Результат" Binding="{Binding Result, Mode=OneWay}" Width="*" DisplayIndex="1">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextWrapping" Value="Wrap"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
         </TabControl>
     </Grid>
 </Window>

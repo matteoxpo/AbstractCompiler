@@ -8,6 +8,7 @@ using Compiler.Models.Lexical;
 using Compiler.Models.Parser;
 using Compiler.Models;
 using Compiler.Models.MRegex;
+using Compiler.Models.ParseDescent;
 
 namespace Compiler;
 public class RelayCommand : ICommand
@@ -50,6 +51,7 @@ public partial class MainWindow : Window
     public ObservableCollection<Lexeme> Lexemes { get; set; } = new();
     public ObservableCollection<ParsedError> WrongLexemes { get; set; } = new();
     public ObservableCollection<RegexCorrectValue> RegexCorrectValues { get; set; } = new();
+    public ObservableCollection<ParsingResult> ParsingResults { get; set; } = new();
 
     private ParsedError _selectedError;
     public ParsedError SelectedError
@@ -349,9 +351,10 @@ public partial class MainWindow : Window
     // Пуск
     public void Start(object parameter)
     {
-        LexicalAnalysis();
+        //LexicalAnalysis();
         LexiaclParse();
         RegexParser();
+        ParseDescent(); 
     }
 
 
@@ -470,6 +473,15 @@ public partial class MainWindow : Window
         foreach (var regCorrectValue in Models.MRegex.RegexParser.Parse(textEditor.Text)) 
         {
             RegexCorrectValues.Add(regCorrectValue);
+        }
+    }
+    private void ParseDescent()
+    {
+        ParsingResults.Clear();
+        var parser = new RecursiveDescentParser();
+        foreach (var text  in textEditor.Text.Split('\n'))
+        {
+            ParsingResults.Add(parser.Parse(text));
         }
     }
 
